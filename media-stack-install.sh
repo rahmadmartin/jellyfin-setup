@@ -17,7 +17,7 @@ cat <<EOF > "$QBT_CONF"
 [Preferences]
 WebUI\Port=8080
 WebUI\Username=webserver-docker
-WebUI\Password_PBKDF2=@ByteArray(8d9f6f5e9f6f2cdb0a4a8d7d8e1cd43a2f9dbf7aa3e2c345e6b4b8c0cf5a3e6d)
+WebUI\Password_PBKDF2="@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)"
 Downloads\SavePath=/downloads
 EOF
 
