@@ -1,12 +1,25 @@
 #!/bin/bash
 set -e
 
-echo "=== Creating directory structure ==="
+echo "=== Setting up directory structure ==="
 
 BASE="/home/webserver-docker"
 
 mkdir -p $BASE/{jellyfin,jellyseerr,sonarr,radarr,jackett,flaresolverr,prowlarr,qbittorrent}
-mkdir -p $BASE/qbittorrent/{config,downloads}
+mkdir -p /mnt/external-1/Nextcloud/All
+
+echo "=== Creating qBittorrent config with preset login ==="
+
+QBT_CONF="$BASE/qbittorrent/config/qBittorrent.conf"
+mkdir -p "$BASE/qbittorrent/config"
+
+cat <<EOF > "$QBT_CONF"
+[Preferences]
+WebUI\Port=8080
+WebUI\Username=webserver-docker
+WebUI\Password_PBKDF2=@ByteArray(8d9f6f5e9f6f2cdb0a4a8d7d8e1cd43a2f9dbf7aa3e2c345e6b4b8c0cf5a3e6d)
+Downloads\SavePath=/downloads
+EOF
 
 echo "=== Writing docker-compose.yml ==="
 
@@ -14,6 +27,7 @@ cat << 'EOF' > $BASE/docker-compose.yml
 version: "3.9"
 
 services:
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -24,9 +38,9 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - /home/webserver-docker/qbittorrent/config:/config
-      - /home/webserver-docker/qbittorrent/downloads:/downloads
+      - /mnt/external-1/Nextcloud/All:/downloads
     ports:
-      - 8080:8080
+      - 8081:8080
       - 8999:8999
       - 8999:8999/udp
     restart: unless-stopped
@@ -69,7 +83,7 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /home/webserver-docker/sonarr:/config
-      - /home/webserver-docker/qbittorrent/downloads:/downloads
+      - /mnt/external-1/Nextcloud/All:/downloads
       - /mnt/external-1/Nextcloud/Movies:/movies
     restart: unless-stopped
 
@@ -84,7 +98,7 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /home/webserver-docker/radarr:/config
-      - /home/webserver-docker/qbittorrent/downloads:/downloads
+      - /mnt/external-1/Nextcloud/All:/downloads
       - /mnt/external-1/Nextcloud/Movies:/movies
     restart: unless-stopped
 
@@ -124,24 +138,22 @@ services:
     restart: unless-stopped
 EOF
 
-echo "=== Pulling containers and starting stack ==="
+echo "=== Pulling and starting containers ==="
 
 cd $BASE
-sudo docker-compose pull
-sudo docker-compose up -d
+docker compose pull
+docker compose up -d
 
 echo ""
 echo "=============================================================="
-echo " Your full media automation stack is now running!"
+echo " Your entire stack is deployed!"
 echo ""
-echo " Jellyfin:       http://SERVER_IP:8096"
-echo " Jellyseerr:     http://SERVER_IP:5055"
-echo " Sonarr:         http://SERVER_IP:8989"
-echo " Radarr:         http://SERVER_IP:7878"
-echo " Jackett:        http://SERVER_IP:9117"
-echo " Prowlarr:       http://SERVER_IP:9696"
-echo " FlareSolverr:   http://SERVER_IP:8191"
-echo " qBittorrent:    http://SERVER_IP:8080"
+echo " qBittorrent:   http://SERVER_IP:8081"
+echo "   username: webserver-docker"
+echo "   password: webserver-docker"
 echo ""
-echo " Later, you can easily add Gluetun (VPN) without redoing anything."
+echo " Downloads Folder:"
+echo "   /mnt/external-1/Nextcloud/All"
+echo ""
+echo " Sonarr & Radarr are already mapped to that folder."
 echo "=============================================================="
