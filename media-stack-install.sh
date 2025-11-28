@@ -127,8 +127,8 @@ EOF
 echo "=== Pulling containers and starting stack ==="
 
 cd $BASE
-sudo docker compose pull
-sudo docker compose up -d
+sudo docker-compose pull
+sudo docker-compose up -d
 
 echo ""
 echo "=============================================================="
